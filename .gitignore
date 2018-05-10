@@ -32,3 +32,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+GDD 2.4 RST/Library/
+GDD 2.4 RST/Temp/
+GDD 2.4 RST/UnityPackageManager/manifest.json
