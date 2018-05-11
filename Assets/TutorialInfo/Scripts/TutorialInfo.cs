@@ -39,9 +39,8 @@ public class TutorialInfo : MonoBehaviour
 		else
 		{
 			alreadyShownThisSession = true;
-
-			// Check player prefs for show at start preference
-			if (PlayerPrefs.HasKey(showAtStartPrefsKey))
+            // Check player prefs for show at start preference
+            if (PlayerPrefs.HasKey(showAtStartPrefsKey))
 			{
 				showAtStart = PlayerPrefs.GetInt(showAtStartPrefsKey) == 1;
 			}
@@ -49,7 +48,8 @@ public class TutorialInfo : MonoBehaviour
 			// set UI toggle to match the existing UI preference
 			showAtStartToggle.isOn = showAtStart;
 
-			// show the overlay info or continue to play the game
+            // show the overlay info or continue to play the game
+            showAtStart = true; // For testing and always showing controls at the start.
 			if (showAtStart) 
 			{
 				ShowLaunchScreen();
