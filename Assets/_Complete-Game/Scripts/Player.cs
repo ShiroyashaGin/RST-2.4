@@ -7,17 +7,27 @@ namespace Completed {
 	// Player inherits from MovingObject, our base class for objects that can move, Enemy also inherits from this.
 	public class Player : MovingObject {
 		public float restartLevelDelay = 1f;		// Delay time in seconds to restart level.
+		public Text foodText;						// UI Text to display current player food total.
+
+		[Header("Points")]
 		public int pointsPerFood = 10;				// Number of points to add to player food points when picking up a food object.
 		public int pointsPerSoda = 20;				// Number of points to add to player food points when picking up a soda object.
 		public int wallDamage = 1;					// How much damage a player does to a wall when chopping it.
-		public Text foodText;						// UI Text to display current player food total.
-		public AudioClip moveSound1;				// 1 of 2 Audio clips to play when player moves.
-		public AudioClip moveSound2;				// 2 of 2 Audio clips to play when player moves.
-		public AudioClip eatSound1;					// 1 of 2 Audio clips to play when player collects a food object.
-		public AudioClip eatSound2;					// 2 of 2 Audio clips to play when player collects a food object.
-		public AudioClip drinkSound1;				// 1 of 2 Audio clips to play when player collects a soda object.
-		public AudioClip drinkSound2;				// 2 of 2 Audio clips to play when player collects a soda object.
+
+		[Header("Sounds")]
+		public AudioClip[] moveSounds;
+		public AudioClip[] eatSounds;
+		public AudioClip[] drinkSounds;
 		public AudioClip gameOverSound;				// Audio clip to play when player dies.
+
+		[Header("Animations")]
+		public string animationChop = "playerChop";
+		public string animationHit = "playerHit";
+
+		[Header("Text")]
+		public string showFoodText = "Food: {0}";
+		public string addFoodText = "+{0} Food: {1}";
+		public string loseFoodText = "-{0} Food: {1}";
 
 		private Animator animator;					// Used to store a reference to the Player's animator component.
 		private int food;                           // Used to store player food points total during level.
@@ -124,7 +134,7 @@ namespace Completed {
 			food--;
 
 			// Update food text display to reflect current score.
-			foodText.text = "Food: " + food;
+			foodText.text = string.Format(showFoodText, food);
 
 			// Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
 			base.AttemptMove<T>(xDir, yDir);
@@ -134,8 +144,8 @@ namespace Completed {
 
 			// If Move returns true, meaning Player was able to move into an empty space.
 			if (Move(xDir, yDir, out hit)) {
-				// Call RandomizeSfx of SoundManager to play the move sound, passing in two audio clips to choose from.
-				SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
+				// Call RandomizeSfx of SoundManager to play the move sound, passing in audio clips to choose from.
+				SoundManager.instance.RandomizeSfx(moveSounds);
 			}
 
 			// Since the player has moved and lost food points, check if the game has ended.
@@ -155,7 +165,7 @@ namespace Completed {
 			hitWall.DamageWall(wallDamage);
 
 			// Set the attack trigger of the player's animation controller in order to play the player's attack animation.
-			animator.SetTrigger("playerChop");
+			animator.SetTrigger(animationChop);
 		}
 
 		// OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).
@@ -174,10 +184,10 @@ namespace Completed {
 				food += pointsPerFood;
 
 				// Update foodText to represent current total and notify player that they gained points
-				foodText.text = "+" + pointsPerFood + " Food: " + food;
+				foodText.text = string.Format(addFoodText, pointsPerFood, food);
 
-				// Call the RandomizeSfx function of SoundManager and pass in two eating sounds to choose between to play the eating sound effect.
-				SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
+				// Call the RandomizeSfx function of SoundManager and pass in eating sounds to choose between to play the eating sound effect.
+				SoundManager.instance.RandomizeSfx(eatSounds);
 
 				// Disable the food object the player collided with.
 				other.gameObject.SetActive(false);
@@ -188,10 +198,10 @@ namespace Completed {
 				food += pointsPerSoda;
 
 				// Update foodText to represent current total and notify player that they gained points
-				foodText.text = "+" + pointsPerSoda + " Food: " + food;
+				foodText.text = string.Format(addFoodText, pointsPerSoda, food);
 
-				// Call the RandomizeSfx function of SoundManager and pass in two drinking sounds to choose between to play the drinking sound effect.
-				SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
+				// Call the RandomizeSfx function of SoundManager and pass in drinking sounds to choose between to play the drinking sound effect.
+				SoundManager.instance.RandomizeSfx(drinkSounds);
 
 				// Disable the soda object the player collided with.
 				other.gameObject.SetActive(false);
@@ -209,13 +219,13 @@ namespace Completed {
 		// It takes a parameter loss which specifies how many points to lose.
 		public void LoseFood(int loss) {
 			// Set the trigger for the player animator to transition to the playerHit animation.
-			animator.SetTrigger("playerHit");
+			animator.SetTrigger(animationHit);
 
 			// Subtract lost food points from the players total.
 			food -= loss;
 
 			// Update the food display with the new total.
-			foodText.text = "-" + loss + " Food: " + food;
+			foodText.text = string.Format(loseFoodText, loss, food);
 
 			// Check to see if game has ended.
 			CheckIfGameOver();

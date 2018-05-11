@@ -5,8 +5,12 @@ namespace Completed {
 	// Enemy inherits from MovingObject, our base class for objects that can move, Player also inherits from this.
 	public class Enemy : MovingObject {
 		public int playerDamage; 							// The amount of food points to subtract from the player when attacking.
-		public AudioClip attackSound1;						// First of two audio clips to play when attacking the player.
-		public AudioClip attackSound2;						// Second of two audio clips to play when attacking the player.
+
+		[Header("Sounds")]
+		public AudioClip[] attackSounds;
+
+		[Header("Animations")]
+		public string animationAttack = "enemyAttack";
 
 		private Animator animator;							// Variable of type Animator to store a reference to the enemy's Animator component.
 		private Transform target;							// Transform to attempt to move toward each turn.
@@ -76,10 +80,10 @@ namespace Completed {
 			hitPlayer.LoseFood(playerDamage);
 
 			// Set the attack trigger of animator to trigger Enemy attack animation.
-			animator.SetTrigger("enemyAttack");
+			animator.SetTrigger(animationAttack);
 
-			// Call the RandomizeSfx function of SoundManager passing in the two audio clips to choose randomly between.
-			SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);
+			// Call the RandomizeSfx function of SoundManager passing in the audio clips to choose randomly between.
+			SoundManager.instance.RandomizeSfx(attackSounds);
 		}
 	}
 }
