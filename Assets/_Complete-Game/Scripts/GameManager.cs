@@ -13,6 +13,10 @@ namespace Completed {
 		[HideInInspector]
 		public bool playersTurn = true;							// Boolean to check if it's players turn, hidden in inspector but public.
 
+		[Header("Text")]
+		public string dayText = "Day {0}";
+		public string dieText = "After {0} days, you starved.";
+
 		private Text levelText;									// Text to display current level number.
 		private GameObject levelImage;							// Image to block out level as levels are being set up, background for levelText.
 		private BoardManager boardScript;						// Store a reference to our BoardManager which will set up the level.
@@ -73,7 +77,7 @@ namespace Completed {
 			levelText = GameObject.Find("LevelText").GetComponent<Text>();
 
 			// Set the text of levelText to the string "Day" and append the current level number.
-			levelText.text = "Day " + level;
+			levelText.text = string.Format(dayText, level);
 
 			// Set levelImage to active blocking player's view of the game board during setup.
 			levelImage.SetActive(true);
@@ -118,7 +122,7 @@ namespace Completed {
 		// GameOver is called when the player reaches 0 food points
 		public void GameOver() {
 			// Set levelText to display number of levels passed and game over message
-			levelText.text = "After " + level + " days, you starved.";
+			levelText.text = string.Format(dieText, level);
 
 			// Enable black background image gameObject.
 			levelImage.SetActive(true);
@@ -137,7 +141,7 @@ namespace Completed {
 
 			// If there are no enemies spawned (IE in first level):
 			if (enemies.Count == 0) {
-				//Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
+				// Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
 				yield return new WaitForSeconds(turnDelay);
 			}
 
