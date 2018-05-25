@@ -6,9 +6,10 @@ using Completed;
 public class Bomb : InventoryItem {
 
     [ContextMenu("Use Bomb")]
-	public void UseItem() {
+	public override void UseItem() {
         foreach (Enemy enemy in GameManager.instance.enemies) {
             Destroy(enemy.gameObject);
         }
+        GameManager.instance.enemies.Clear();
     }
 }

@@ -48,6 +48,11 @@ namespace Completed {
 			// Get the current food point total stored in GameManager.instance between levels.
 			food = GameManager.instance.playerFoodPoints;
 
+            inventoryItem = GameManager.instance.inventoryItem;
+
+            if (PlayerDataSaver.instance._inventoryItem != null)
+            PickUpItem(PlayerDataSaver.instance._inventoryItem);
+
 			// Set the foodText to reflect the current player food total.
 			foodText.text = "Food: " + food;
 
@@ -57,8 +62,11 @@ namespace Completed {
 
 		// This function is called when the behaviour becomes disabled or inactive.
 		private void OnDisable() {
-			// When Player object is disabled, store the current local food total in the GameManager so it can be re-loaded in next level.
-			GameManager.instance.playerFoodPoints = food;
+            // When Player object is disabled, store the current local food total in the GameManager so it can be re-loaded in next level.
+            PlayerDataSaver.instance._inventoryItem = inventoryItem;
+            GameManager.instance.playerFoodPoints = food;
+            //GameManager.instance.inventoryItem = inventoryItem;
+            
 		}
 
 		private void Update() {
@@ -69,6 +77,7 @@ namespace Completed {
 
 			int horizontal = 0;  	// Used to store the horizontal move direction.
 			int vertical = 0;		// Used to store the vertical move direction.
+            bool actionButton;
 
 			// Check if we are running either in the Unity editor or in a standalone build.
 #if UNITY_STANDALONE || UNITY_WEBPLAYER
@@ -78,12 +87,14 @@ namespace Completed {
 			// Get input from the input manager, round it to an integer and store in vertical to set y axis move direction
 			vertical = (int)(Input.GetAxisRaw("Vertical"));
 
+            actionButton = Input.GetButtonDown("Fire1");
+
 			// Check if moving horizontally, if so set vertical to zero.
 			if (horizontal != 0) {
 				vertical = 0;
 			}
 
-			// Check if we are running on iOS, Android, Windows Phone 8 or Unity iPhone
+            // Check if we are running on iOS, Android, Windows Phone 8 or Unity iPhone
 #elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
 			// Check if Input has registered more than zero touches
 			if (Input.touchCount > 0) {
@@ -122,6 +133,11 @@ namespace Completed {
 				}
 			}
 #endif //End of mobile platform dependendent compilation section started above with #elif
+
+            if (actionButton && inventoryItem != null) {
+                inventoryItem.UseItem();
+                inventoryItem = null;
+            }
 
 			// Check if we have a non-zero value for horizontal or vertical
 			if (horizontal != 0 || vertical != 0) {
@@ -176,11 +192,14 @@ namespace Completed {
 		private void OnTriggerEnter2D(Collider2D other) {
 			// Check if the tag of the trigger collided with is Exit.
 			if (other.tag == "Exit") {
-				// Invoke the Restart function to start the next level with a delay of restartLevelDelay (default 1 second).
-				Invoke("Restart", restartLevelDelay);
+                PlayerDataSaver.instance._inventoryItem = inventoryItem;
+                // Disable the player object since level is over.
+                enabled = false;
+                // Invoke the Restart function to start the next level with a delay of restartLevelDelay (default 1 second).
+                Invoke("Restart", restartLevelDelay);
 
-				// Disable the player object since level is over.
-				enabled = false;
+				
+                
 			}
 			// Check if the tag of the trigger collided with is Food.
 			else if (other.tag == "Food") {
@@ -210,15 +229,22 @@ namespace Completed {
 				// Disable the soda object the player collided with.
 				other.gameObject.SetActive(false);
 			}
-            else if (other.CompareTag("InventoryItem")) {
-                Debug.Log("Collide with bomb");
-                PickUpItem(other.GetComponent<InventoryItem>());
+
+            if(inventoryItem == null) {
+                    if (other.CompareTag("InventoryItem")) {
+                    PickUpItem(other.GetComponent<InventoryItem>());
+                }
             }
+           
 		}
 
         void PickUpItem(InventoryItem item) {
             inventoryItem = item;
-            inventoryItemSlot.sprite = item.GetComponent<SpriteRenderer>().sprite; 
+            inventoryItemSlot.sprite = item.GetComponent<SpriteRenderer>().sprite;
+
+            item.GetComponent<SpriteRenderer>().enabled = false;
+            item.GetComponent<BoxCollider2D>().enabled = false;
+            DontDestroyOnLoad(item.gameObject);
 
         }
 
