@@ -138,6 +138,7 @@ namespace Completed {
             if (actionButton && inventoryItem != null) {
                 inventoryItem.UseItem();
                 inventoryItem = null;
+                inventoryItemSlot.sprite = null;
             }
 
 			// Check if we have a non-zero value for horizontal or vertical
@@ -252,7 +253,10 @@ namespace Completed {
             inventoryItem = item;
             inventoryItemSlot.sprite = item.GetComponent<SpriteRenderer>().sprite;
 
+            if(item.GetComponent<SpriteRenderer>() != null)
             item.GetComponent<SpriteRenderer>().enabled = false;
+
+            if (item.GetComponent<BoxCollider2D>() != null)
             item.GetComponent<BoxCollider2D>().enabled = false;
             DontDestroyOnLoad(item.gameObject);
 
