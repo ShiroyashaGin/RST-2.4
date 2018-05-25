@@ -29,7 +29,11 @@ namespace Completed {
 		public string addFoodText = "+{0} Food: {1}";
 		public string loseFoodText = "-{0} Food: {1}";
 
-		private Animator animator;					// Used to store a reference to the Player's animator component.
+        [Header("Items")]
+        public Image inventoryItemSlot;
+        public InventoryItem inventoryItem;
+
+        private Animator animator;					// Used to store a reference to the Player's animator component.
 		private int food;                           // Used to store player food points total during level.
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
@@ -206,7 +210,18 @@ namespace Completed {
 				// Disable the soda object the player collided with.
 				other.gameObject.SetActive(false);
 			}
+            else if (other.CompareTag("InventoryItem")) {
+                Debug.Log("Collide with bomb");
+                PickUpItem(other.GetComponent<InventoryItem>());
+            }
 		}
+
+        void PickUpItem(InventoryItem item) {
+            inventoryItem = item;
+            inventoryItemSlot.sprite = item.GetComponent<SpriteRenderer>().sprite; 
+
+        }
+
 
 		// Restart reloads the scene when called.
 		private void Restart() {
