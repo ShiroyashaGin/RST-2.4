@@ -78,7 +78,7 @@ namespace Completed {
 
 		// The virtual keyword means AttemptMove can be overridden by inheriting classes using the override keyword.
 		// AttemptMove takes a generic parameter T to specify the type of component we expect our unit to interact with if blocked (Player for Enemies, Wall for Player).
-		protected virtual void AttemptMove<T>(int xDir, int yDir) where T : Component {
+		protected virtual void AttemptMove(int xDir, int yDir) { //where T : Component {
 			// Hit will store whatever our linecast hits when Move is called.
 			RaycastHit2D hit;
 
@@ -91,17 +91,17 @@ namespace Completed {
 				return;
 
 			// Get a component reference to the component of type T attached to the object that was hit
-			T hitComponent = hit.transform.GetComponent<T>();
+			//T hitComponent = hit.transform.GetComponent<T>();
 
 			// If canMove is false and hitComponent is not equal to null, meaning MovingObject is blocked and has hit something it can interact with.
-			if (!canMove && hitComponent != null) {
+			if (!canMove) {
 				// Call the OnCantMove function and pass it hitComponent as a parameter.
-				OnCantMove(hitComponent);
+				OnCantMove(hit.transform);
 			}
 		}
 
 		// The abstract modifier indicates that the thing being modified has a missing or incomplete implementation.
 		// OnCantMove will be overriden by functions in the inheriting classes.
-		protected abstract void OnCantMove<T>(T component) where T : Component;
+		protected abstract void OnCantMove(Transform component); // where T : Component;
 	}
 }

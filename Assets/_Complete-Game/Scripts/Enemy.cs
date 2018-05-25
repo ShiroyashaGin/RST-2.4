@@ -5,9 +5,11 @@ namespace Completed {
 	// Enemy inherits from MovingObject, our base class for objects that can move, Player also inherits from this.
 	public class Enemy : MovingObject {
 		public int playerDamage; 							// The amount of food points to subtract from the player when attacking.
+		public int hp = 3;
 
 		[Header("Sounds")]
 		public AudioClip[] attackSounds;
+		public AudioClip[] damageSounds;
 
 		[Header("Animations")]
 		public string animationAttack = "enemyAttack";
@@ -34,7 +36,7 @@ namespace Completed {
 
 		// Override the AttemptMove function of MovingObject to include functionality needed for Enemy to skip turns.
 		// See comments in MovingObject for more on how base AttemptMove function works.
-		protected override void AttemptMove<T>(int xDir, int yDir) {
+		protected override void AttemptMove(int xDir, int yDir) {
 			// Check if skipMove is true, if so set it to false and skip this turn.
 			if (skipMove) {
 				skipMove = false;
@@ -42,7 +44,7 @@ namespace Completed {
 			}
 
 			// Call the AttemptMove function from MovingObject.
-			base.AttemptMove<T>(xDir, yDir);
+			base.AttemptMove(xDir, yDir);
 
 			// Now that Enemy has moved, set skipMove to true to skip next move.
 			skipMove = true;
@@ -67,23 +69,42 @@ namespace Completed {
 			}
 
 			// Call the AttemptMove function and pass in the generic parameter Player, because Enemy is moving and expecting to potentially encounter a Player
-			AttemptMove<Player>(xDir, yDir);
+			AttemptMove(xDir, yDir);
 		}
 
 		// OnCantMove is called if Enemy attempts to move into a space occupied by a Player, it overrides the OnCantMove function of MovingObject 
 		// and takes a generic parameter T which we use to pass in the component we expect to encounter, in this case Player
-		protected override void OnCantMove<T>(T component) {
+		protected override void OnCantMove(Transform component) {
 			// Declare hitPlayer and set it to equal the encountered component.
-			Player hitPlayer = component as Player;
+			Player hitPlayer = component.GetComponent<Player>();
 
-			// Call the LoseFood function of hitPlayer passing it playerDamage, the amount of foodpoints to be subtracted.
-			hitPlayer.LoseFood(playerDamage);
+			if (hitPlayer) {
+				// Call the LoseFood function of hitPlayer passing it playerDamage, the amount of foodpoints to be subtracted.
+				hitPlayer.LoseFood(playerDamage);
 
-			// Set the attack trigger of animator to trigger Enemy attack animation.
-			animator.SetTrigger(animationAttack);
+				// Set the attack trigger of animator to trigger Enemy attack animation.
+				animator.SetTrigger(animationAttack);
 
-			// Call the RandomizeSfx function of SoundManager passing in the audio clips to choose randomly between.
-			SoundManager.instance.RandomizeSfx(attackSounds);
+				// Call the RandomizeSfx function of SoundManager passing in the audio clips to choose randomly between.
+				SoundManager.instance.RandomizeSfx(attackSounds);
+			}
+		}
+
+		// DamageEnemy is called when the player attacks a enemy.
+		public void DamageEnemy(int loss) {
+			// Call the RandomizeSfx function of SoundManager to play one of two chop sounds.
+			SoundManager.instance.RandomizeSfx(damageSounds);
+
+			// Subtract loss from hit point total.
+			hp -= loss;
+
+			// If hit points are less than or equal to zero:
+			if (hp <= 0) {
+				// Disable the gameObject.
+				gameObject.SetActive(false);
+
+				GameManager.instance.RemoveEnemyFromList(this);
+			}
 		}
 	}
 }

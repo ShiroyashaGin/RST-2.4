@@ -13,6 +13,7 @@ namespace Completed {
 		public int pointsPerFood = 10;				// Number of points to add to player food points when picking up a food object.
 		public int pointsPerSoda = 20;				// Number of points to add to player food points when picking up a soda object.
 		public int wallDamage = 1;					// How much damage a player does to a wall when chopping it.
+		public int enemyDamage = 1;
 
 		[Header("Sounds")]
 		public AudioClip[] moveSounds;
@@ -143,13 +144,13 @@ namespace Completed {
 			if (horizontal != 0 || vertical != 0) {
 				// Call AttemptMove passing in the generic parameter Wall, since that is what Player may interact with if they encounter one (by attacking it)
 				// Pass in horizontal and vertical as parameters to specify the direction to move Player in.
-				AttemptMove<Wall>(horizontal, vertical);
+				AttemptMove(horizontal, vertical);
 			}
 		}
 
 		// AttemptMove overrides the AttemptMove function in the base class MovingObject
 		// AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
-		protected override void AttemptMove<T>(int xDir, int yDir) {
+		protected override void AttemptMove(int xDir, int yDir) {
 			// Every time player moves, subtract from food points total.
 			food--;
 
@@ -157,7 +158,7 @@ namespace Completed {
 			foodText.text = string.Format(showFoodText, food);
 
 			// Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
-			base.AttemptMove<T>(xDir, yDir);
+			base.AttemptMove(xDir, yDir);
 
 			// Hit allows us to reference the result of the Linecast done in Move.
 			RaycastHit2D hit;
@@ -177,15 +178,24 @@ namespace Completed {
 
 		// OnCantMove overrides the abstract function OnCantMove in MovingObject.
 		// It takes a generic parameter T which in the case of Player is a Wall which the player can attack and destroy.
-		protected override void OnCantMove<T>(T component) {
+		protected override void OnCantMove(Transform component) {
 			// Set hitWall to equal the component passed in as a parameter.
-			Wall hitWall = component as Wall;
+			Wall hitWall = component.GetComponent<Wall>();
+			Enemy enemy = component.GetComponent<Enemy>();
 
-			// Call the DamageWall function of the Wall we are hitting.
-			hitWall.DamageWall(wallDamage);
+			if (hitWall) {
+				// Call the DamageWall function of the Wall we are hitting.
+				hitWall.DamageWall(wallDamage);
 
-			// Set the attack trigger of the player's animation controller in order to play the player's attack animation.
-			animator.SetTrigger(animationChop);
+				// Set the attack trigger of the player's animation controller in order to play the player's attack animation.
+				animator.SetTrigger(animationChop);
+			}
+			else if (enemy) {
+				enemy.DamageEnemy(enemyDamage);
+
+				// Set the attack trigger of the player's animation controller in order to play the player's attack animation.
+				animator.SetTrigger(animationChop);
+			}
 		}
 
 		// OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).
