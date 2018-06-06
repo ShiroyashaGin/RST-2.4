@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using GameAnalyticsSDK;
 
 namespace Completed {
 	// Player inherits from MovingObject, our base class for objects that can move, Enemy also inherits from this.
@@ -203,6 +204,7 @@ namespace Completed {
 		private void OnTriggerEnter2D(Collider2D other) {
 			// Check if the tag of the trigger collided with is Exit.
 			if (other.tag == "Exit") {
+                GameAnalytics.NewProgressionEvent(GAProgressionStatus.Complete, "level1");
                 PlayerDataSaver.instance._inventoryItem = inventoryItem;
                 // Disable the player object since level is over.
                 enabled = false;
