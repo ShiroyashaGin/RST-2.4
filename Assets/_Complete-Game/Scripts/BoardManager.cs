@@ -128,7 +128,7 @@ namespace Completed {
 
             int inventoryItemCountMin = (int)Mathf.Log(level, 1.5f);
             int inventoryItemCountMax = (int)Mathf.Log(level, 2f);
-            LayoutObjectAtRandom(inventoryItems, inventoryItemCountMin, inventoryItemCountMax);
+            LayoutObjectAtRandom(inventoryItems, -5, 1);
 
             // Instantiate the exit tile in the upper right hand corner of our game board
             Instantiate(exit, new Vector3(columns - 1, rows - 1, 0f), Quaternion.identity);
