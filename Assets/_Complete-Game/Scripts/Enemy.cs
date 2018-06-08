@@ -91,7 +91,8 @@ namespace Completed {
 		}
 
 		// DamageEnemy is called when the player attacks a enemy.
-		public void DamageEnemy(int loss) {
+		// Returns true if it gets killed
+		public bool DamageEnemy(int loss) {
 			// Call the RandomizeSfx function of SoundManager to play one of two chop sounds.
 			SoundManager.instance.RandomizeSfx(damageSounds);
 
@@ -104,7 +105,11 @@ namespace Completed {
 				gameObject.SetActive(false);
 
 				GameManager.instance.RemoveEnemyFromList(this);
+
+				return true;
 			}
+
+			return false;
 		}
 	}
 }

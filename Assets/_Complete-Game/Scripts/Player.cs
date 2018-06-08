@@ -35,6 +35,9 @@ namespace Completed {
         public Image inventoryItemSlot;
         public InventoryItem inventoryItem;
 
+		private int level = 0;
+		private int items = 0;
+		private int kills = 0;
         private Animator animator;					// Used to store a reference to the Player's animator component.
 		private int food;                           // Used to store player food points total during level.
 
@@ -193,7 +196,11 @@ namespace Completed {
 				animator.SetTrigger(animationChop);
 			}
 			else if (enemy) {
-				enemy.DamageEnemy(enemyDamage);
+				bool kill = enemy.DamageEnemy(enemyDamage);
+
+				if (kill) {
+					kills++;
+				}
 
 				// Set the attack trigger of the player's animation controller in order to play the player's attack animation.
 				animator.SetTrigger(animationChop);
@@ -204,15 +211,13 @@ namespace Completed {
 		private void OnTriggerEnter2D(Collider2D other) {
 			// Check if the tag of the trigger collided with is Exit.
 			if (other.tag == "Exit") {
-                GameAnalytics.NewProgressionEvent(GAProgressionStatus.Complete, "level1");
+				level++;
+
                 PlayerDataSaver.instance._inventoryItem = inventoryItem;
                 // Disable the player object since level is over.
                 enabled = false;
                 // Invoke the Restart function to start the next level with a delay of restartLevelDelay (default 1 second).
                 Invoke("Restart", restartLevelDelay);
-
-				
-                
 			}
 			// Check if the tag of the trigger collided with is Food.
 			else if (other.tag == "Food") {
@@ -243,9 +248,10 @@ namespace Completed {
 				other.gameObject.SetActive(false);
 			}
 
-            if(inventoryItem == null) {
-                    if (other.CompareTag("InventoryItem")) {
-                    PickUpItem(other.GetComponent<InventoryItem>());
+            if (inventoryItem == null) {
+                if (other.CompareTag("InventoryItem")) {
+					items++;
+					PickUpItem(other.GetComponent<InventoryItem>());
                 }
             }
            
@@ -255,15 +261,14 @@ namespace Completed {
             inventoryItem = item;
             inventoryItemSlot.sprite = item.GetComponent<SpriteRenderer>().sprite;
 
-            if(item.GetComponent<SpriteRenderer>() != null)
-            item.GetComponent<SpriteRenderer>().enabled = false;
+            if (item.GetComponent<SpriteRenderer>() != null)
+				item.GetComponent<SpriteRenderer>().enabled = false;
 
             if (item.GetComponent<BoxCollider2D>() != null)
-            item.GetComponent<BoxCollider2D>().enabled = false;
+				item.GetComponent<BoxCollider2D>().enabled = false;
+
             DontDestroyOnLoad(item.gameObject);
-
         }
-
 
 		// Restart reloads the scene when called.
 		private void Restart() {
@@ -292,6 +297,11 @@ namespace Completed {
 		private void CheckIfGameOver() {
 			// Check if food point total is less than or equal to zero.
 			if (food <= 0) {
+				// Analytics
+				GameAnalytics.NewDesignEvent("level", level);
+				GameAnalytics.NewDesignEvent("items", items);
+				GameAnalytics.NewDesignEvent("kills", kills);
+
 				// Call the PlaySingle function of SoundManager and pass it the gameOverSound as the audio clip to play.
 				SoundManager.instance.PlaySingle(gameOverSound);
 
